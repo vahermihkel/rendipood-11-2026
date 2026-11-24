@@ -46,7 +46,7 @@ public class ProductController {
 
     @PutMapping("products/{id}/type")
     public ResponseEntity<Product> editProduct(@RequestBody Product product) {
-        if (product.getProductType() == null) {
+        if (product.getType() == null) {
             throw new RuntimeException("Product must have ID when editing");
         }
         return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(product));
@@ -56,7 +56,7 @@ public class ProductController {
     @PatchMapping("products/{id}/type/{productType}")
     public ResponseEntity<Product> changeType(@PathVariable Long id,@PathVariable ProductType productType){
         Product product = productRepository.findById(id).orElseThrow();
-        product.setProductType(productType);
+        product.setType(productType);
         productRepository.save(product);
         return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(product));
     }

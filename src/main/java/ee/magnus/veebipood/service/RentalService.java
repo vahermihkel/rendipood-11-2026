@@ -8,6 +8,7 @@ import ee.magnus.veebipood.repository.ProductRepository;
 import ee.magnus.veebipood.repository.RentalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -21,18 +22,20 @@ public class RentalService {
     private final Double PREMIUM_PRICE = 4.0;
     private final Double BASIC_PRICE = 3.0;
 
+    @Transactional
     public Rental saveRental(List<RentalProduct> rentalProducts) {
         Rental rental = new Rental();
         //rental.setId();
         rental.setCreated(new Date());
         //rental.setLateFee();
+        rental = rentalRepository.save(rental); // save before linking products, otherwise cascade creates a copy of rental for every product
 
         Double initialFee = calculateInitialFee(rentalProducts, rental);
         rental.setInitialFee(initialFee);
         return rentalRepository.save(rental);
     }
 
-    private Double calculateInitialFee(List<RentalProduct> rentalProducts, Rental rental) {
+    public Double calculateInitialFee(List<RentalProduct> rentalProducts, Rental rental) {
         Double initialFee = 0.0;
         for (RentalProduct rentalProduct: rentalProducts) {
             if (rentalProduct.getDays() < 1) {
@@ -45,12 +48,12 @@ public class RentalService {
             dbProduct.setRental(rental);
             dbProduct.setRentedDays(rentalProduct.getDays());
             productRepository.save(dbProduct);
-            initialFee += determineProductFee(dbProduct.getProductType(), rentalProduct.getDays());
+            initialFee += determineProductFee(dbProduct.getType(), rentalProduct.getDays());
         }
         return initialFee;
     }
 
-    private Double determineProductFee(ProductType type, int days) {
+    public Double determineProductFee(ProductType type, int days) {
         switch (type) {
             case NEW -> {
                 return days * PREMIUM_PRICE;

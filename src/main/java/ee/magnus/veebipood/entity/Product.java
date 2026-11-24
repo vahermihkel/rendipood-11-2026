@@ -16,7 +16,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private ProductType productType;
+    private ProductType type;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Rental rental;
